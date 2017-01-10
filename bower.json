@@ -1,0 +1,23 @@
+{
+  "name": "vk.friends",
+  "description": "",
+  "main": "app.js",
+  "authors": [
+    "Vladimir <logovazzik@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "moment-js": "^0.6.0",
+    "angular": "1.6",
+    "jquery": "1.9",
+    "underscore": "^1.8.3"
+  }
+}
