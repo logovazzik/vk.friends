@@ -7,6 +7,19 @@
 
     <script src="app.js"></script>
 </head>
-<body ng-controller="BaseController"></body>
+<body ng-controller="BaseController as ctrl">
+<form ng-if="ctrl.model.noUserId" ng-submit="ctrl.submit()">
+    <input ng-model="ctrl.model.userId"/>
+</form>
+
+<div ng-if="ctrl.model.statistics.length">
+    <div ng-repeat="timeGroup in ctrl.model.statistics">
+        <div ng-repeat="friend in timeGroup.data">
+            <img ng-src="{{friend.photo_200_orig}}" width="200" height="200"/>
+        </div>
+    </div>
+</div>
+
+</body>
 
 </html>

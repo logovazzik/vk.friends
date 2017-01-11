@@ -1,207 +1,272 @@
-angular.module('app', []).config(function ($sceProvider) {
-    // Completely disable SCE.  For demonstration purposes only!
-    // Do not use in new projects.
-    $sceProvider.enabled(false);
-}).constant('FriendStatus', {
-    deleted: 'DELETED',
-    added : 'ADDED'
+﻿angular.module('app', [])
+    .config(function ($sceProvider) {
+        // Completely disable SCE.  For demonstration purposes only!
+        // Do not use in new projects.
+        $sceProvider.enabled(false);
     })
-    .constant('appConfig',
+    .constant('FriendStatus',
     {
-        storageKey: 'vk.friends',
+        deleted: 'DELETED',
+        added: 'ADDED'
+    })
+    .constant('AppConfig',
+    {
+        storageUserKey: 'vk.friends.user.id',
+        storageFriendsKey: 'vk.friends',
         dateTimeFormat: 'DD.MM.YYYY'
     })
-    .controller('BaseController', ['FriendService', function (FriendService) {
-        FriendService.getFriends(17864153).then(function (data) {
-            debugger;
-        });
-    }]).
-    service('FriendService', ['Friends', 'FriendStatus', '$q', function (friendsProvider, friendStatus, $q) {
-        var friends;
-        this.getFriends = getFriends;
-        function getFriends(id) {
-            var defer = $q.defer();
-            friendsProvider.getFriends(id).then(function (data) {
-                friends = data;
-               
-
-                function compare(prevFragment, nextFragment, reverse) {
-                    var exists, result = [];
-                    if (reverse) {
-                        var _prev = prevFragment,
-                            _next = nextFragment,
-                        nextFragment = _prev;
-                        prevFragment = _next;
-                    }
-                    for (var i = 0; i<nextFragment.length; ++i) {
-                        exists = false
-                        for (var b = 0; b< prevFragment.length; ++b) {
-                            if (nextFragment[i].uid === prevFragment[b].uid) {
-                                exists = true;
-                                break;
-                            }
-                        }
-                        if (!exists) {
-                            nextFragment[i].status = reverse ? friendStatus.deleted : friendStatus.added;
-                            result.push(nextFragment[i]);
-                        }
-                    }
-                    return result;
+    .controller('BaseController',
+    [
+        'FriendService', 'StorageService', 'AppConfig', function (friendService, storageService, config) {
+            var self = this;
+            this.submit = function () {
+                if (this.model.userId) {
+                    this.model.noUserId = false;
+                    storageService.setItem(config.storageUserKey, this.model.userId);
+                    fillData();
                 }
-                if (friends.length === 1 || friends.length === 0) {
-                    defer.resolve([]);
-                    return defer.promise;
-                }
-                var temp = [], last;
-                for (var i = 0; i < friends.length; ++i) {
-                    if (last) {
-                        temp.push(
-                        {
-                            time: friends[i].fragmentUnixTime,
-                            diff: compare(last.data, friends[i].data, true)
-                        });
+              
+            };
 
-                        temp.push(
-                      {
-                          time: friends[i].fragmentUnixTime,
-                          diff: compare(last.data, friends[i].data)
+            this.model = {
+                userId: null,
+                statistics: null,
+                noUserId : false
+            };
+
+            //17864153
+            function init() {
+                self.model.userId = storageService.getItem(config.storageUserKey);
+                if (self.model.userId) {
+                    fillData();
+                } else {
+                    self.model.noUserId = true;
+                }
+            }
+
+            function fillData() {
+                friendService.getStatistics(self.model.userId)
+                      .then(function (data) {
+                          self.model.statistics = data;
                       });
-                    }
-                    last = friends[i];
+            }
+
+            init();
+
+
+        }
+    ])
+    .service('FriendService',
+    [
+        'Friends', 'FriendStatus', '$q', function (friendsProvider, friendStatus, $q) {
+
+            this.getStatistics = getStatistics;
+
+            function compareSnapshots(prevSnapshot, nextSnapshot, reverse) {
+                var exists, result = [];
+                if (reverse) {
+                    var _prev = prevSnapshot,
+                        _next = nextSnapshot;
+                    nextSnapshot = _prev;
+                    prevSnapshot = _next;
                 }
-                var dateKeys = _.uniq([].map.call(temp, function(item) {
-                    return item.time;
-                }));
-                dateKeys.forEach(function(item, key) {
-                    temp.filter(function(item2) {
-                        return item2.time === item;
-                    })
-                })
-                defer.resolve(temp)
-            });
-
-            return defer.promise;
-        }
-     
-    }])
-	.service('StorageService', ['$window', function ($window) {
-	    this.setItem = setItem;
-	    this.getItem = getItem;
-		
-		
-	    function getItem(key){
-			
-	        var item = $window.localStorage.getItem(key);
-			
-			
-	        return item? JSON.parse(item): null;
-			
-	    }
-		
-	    function setItem(key, data) {
-	        debugger;
-	        if(typeof data !== 'string'){
-	            data = JSON.stringify(data);	
-	        }
-	        $window.localStorage.setItem(key, data);
-	        return data;
-	    }
-		
-	}])
-    .provider('Friends', function () {
-        var url = '',
-            cacheableData,
-            serverUnixTime,
-
-            fragmentExists;
-
-        this.setUrl = function (u) {
-            url = u;
-        };
-        function Fragment(settings) {
-            this.fragmentUnixTime = settings.fragmentUnixTime;
-            this.data = settings.data;
-        }
-        this.$get = ['$http', '$q', '$window', 'appConfig', 'StorageService', function ($http, $q, $window, config, storageService) {
-            function insertIntoCache() {
-
+                for (var i = 0; i < nextSnapshot.length; ++i) {
+                    exists = false;
+                    for (var b = 0; b < prevSnapshot.length; ++b) {
+                        if (nextSnapshot[i].uid === prevSnapshot[b].uid) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        nextSnapshot[i].status = reverse ? friendStatus.deleted : friendStatus.added;
+                        result.push(nextSnapshot[i]);
+                    }
+                }
+                return result;
             }
 
-            function isTheSameDay(unix1, unix2) {
-                return moment.unix(unix1).isSame(moment.unix(unix2), 'day')
-            }
+            function getStatistics(userId) {
+                var defer = $q.defer();
+                friendsProvider.getFriends(userId)
+                    .then(function (data) {
+                        var friendsSnapshots = data;
 
-            function getServerTime() {
-                return $http.jsonp('https://api.vk.com/method/utils.getServerTime')
-                    .then(function (response) {
-                        return response.data.response;
+                        if (friendsSnapshots.length < 2) {
+                            defer.resolve([]);
+                            return defer.promise;
+                        }
+
+                        var unconcatedResult = [], result = [], lastSnapshot;
+                        for (var i = 0; i < friendsSnapshots.length; ++i) {
+
+                            var currentSnapshot = friendsSnapshots[i];
+
+                            if (lastSnapshot) {
+                                unconcatedResult.push(
+                                {
+                                    date: friendsSnapshots[i].date,
+                                    data: compareSnapshots(lastSnapshot.data, currentSnapshot.data, true)
+                                });
+
+                                unconcatedResult.push(
+                                {
+                                    date: friendsSnapshots[i].date,
+                                    data: compareSnapshots(lastSnapshot.data, currentSnapshot.data)
+                                });
+                            }
+                            lastSnapshot = friendsSnapshots[i];
+                        }
+                        var keys = _.uniq([].map.call(unconcatedResult,
+                            function (item) {
+                                return item.date;
+                            }));
+                        for (var i = 0; i < keys.length; ++i) {
+                            var tmp = [];
+                            for (var j = 0; j < unconcatedResult.length; ++j) {
+                                if (keys[i] === unconcatedResult[j].date) {
+                                    tmp = tmp.concat(unconcatedResult[j].data);
+                                }
+                            }
+                            if (tmp.length) {
+                                result.push({
+                                    date: keys[i],
+                                    data: tmp
+                                });
+                            }
+
+                        }
+                        defer.resolve(result);
                     });
+
+
+                return defer.promise;
             }
 
-            return {
-                getFriends: function getFriends(userId) { 
-                    var defer = getFriends.defer = $q.defer();
-                    (serverUnixTime ? $q.when(serverUnixTime) : getServerTime()).then(function (data) {
-                        serverUnixTime = data;
+        }
+    ])
+    .service('StorageService',
+    [
+        '$window', function ($window) {
+            this.setItem = setItem;
+            this.getItem = getItem;
 
-                    })
-                        .then(function () {
-                            var storageData;
-                            if (getFriends.inProcess) {
-                                return getFriends.defer.promise;
-                            }
-                         
 
-                            if (cacheableData) {
-                                defer.resolve(cacheableData);
-                                return defer.promise;
-                            }
+            function getItem(key) {
+                var item = $window.localStorage.getItem(key);
+                return item ? JSON.parse(item) : null;
 
-                            if ((storageData = storageService.getItem(config.storageKey))) {
-                                
-                                if ((storageData = storageData[userId])) {
-                                    fragmentExists = false;
-                                    for (var i = 0; i < storageData.length; ++i) {
-                                        if (isTheSameDay(storageData[i].fragmentUnixTime, serverUnixTime)) {
-                                            fragmentExists = true;
-                                            break;
-                                        }
+            }
+
+            function setItem(key, data) {
+                if (typeof data !== 'string') {
+                    data = JSON.stringify(data);
+                }
+                $window.localStorage.setItem(key, data);
+                return data;
+            }
+
+        }
+    ])
+    .provider('Friends',
+        function () {
+            var url = '',
+                cacheableData,
+                serverTime,
+                snapshotExists;
+
+            this.setUrl = function (u) {
+                url = u;
+            };
+
+            function Snapshot(settings) {
+                this.date = settings.date;
+                this.data = settings.data;
+            }
+
+            this.$get = [
+                '$http', '$q', '$window', 'AppConfig', 'StorageService',
+                function ($http, $q, $window, config, storageService) {
+
+                    function isTheSameDay(unix1, unix2) {
+                        return moment.unix(unix1).isSame(moment.unix(unix2), 'day');
+                    }
+
+                    function getServerTime() {
+                        return $http.jsonp('https://api.vk.com/method/utils.getServerTime')
+                            .then(function (response) {
+                                debugger;
+                                return response.data.response;
+                            });
+                    }
+
+                    return {
+                        getFriends: function getFriends(userId) {
+                            var defer = getFriends.defer = $q.defer();
+                            (serverTime ? $q.when(serverTime) : getServerTime()).then(function (data) {
+                                serverTime = data;
+                            })
+                                .then(function () {
+                                    var storageData;
+                                    if (getFriends.inProcess) {
+                                        return getFriends.defer.promise;
                                     }
-                                    if (fragmentExists) {
-                                        defer.resolve(cacheableData = storageData);
+
+
+                                    if (cacheableData) {
+                                        defer.resolve(cacheableData);
                                         return defer.promise;
                                     }
 
-                                }
-                            }
+                                    if ((storageData = storageService.getItem(config.storageFriendsKey))) {
+
+                                        if ((storageData = storageData[userId])) {
+                                            snapshotExists = false;
+                                            for (var i = 0; i < storageData.length; ++i) {
+                                                if (isTheSameDay(storageData[i].date, serverTime)) {
+                                                    snapshotExists = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (snapshotExists) {
+                                                defer.resolve(cacheableData = storageData);
+                                                return defer.promise;
+                                            }
+
+                                        }
+                                    }
 
 
-                            getFriends.inProcess = true;
-                            $http.jsonp('https://api.vk.com/method/friends.get?user_id=17864153&fields=nickname')
-                                .then(function (response) {
-                                    var data = storageService.getItem(config.storageKey);
-                                   
-                                    data = data ? data : {};
-                                    data[userId] = data[userId] || [];
+                                    getFriends.inProcess = true;
+                                    $http
+                                        .jsonp('https://api.vk.com/method/friends.get?user_id=17864153&fields=nicknamenickname,photo_200_orig,online,last_seen')
+                                        .then(function (response) {
+                                            var data = storageService.getItem(config.storageFriendsKey);
 
-                                    data[userId].push(new Fragment({
-                                        fragmentUnixTime: serverUnixTime,
-                                        data: response.data.response
-                                    }));
+                                            data = data ? data : {};
+                                            data[userId] = data[userId] || [];
+                                            debugger;
+                                            data[userId].push(new Snapshot({
+                                                date: serverTime,
+                                                data: response.data.response
+                                            }));
 
-                                    storageService.setItem(config.storageKey, data);
-                                    
-                                    defer.resolve(cacheableData = data[userId]);
-                                })
-                                .finally(function () {
-                                    getFriends.inProcess = false;
+                                            storageService.setItem(config.storageFriendsKey, data);
+
+                                            defer.resolve(cacheableData = data[userId]);
+                                        })
+                                        .finally(function () {
+                                            getFriends.inProcess = false;
+                                        });
                                 });
-                        });
 
-                    return defer.promise;
+                            return defer.promise;
+                        }
+
+                    }
+
                 }
+            ];
+        });
 
-            }
 
-        }];
-    });
