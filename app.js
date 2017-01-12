@@ -4,7 +4,7 @@
         // Do not use in new projects.
         $sceProvider.enabled(false);
     })
-    .constant('FriendStatus',
+    .constant('FriendStatusEnum',
     {
         deleted: 'DELETED',
         added: 'ADDED'
@@ -13,11 +13,12 @@
     {
         storageUserKey: 'vk.friends.user.id',
         storageFriendsKey: 'vk.friends',
-        dateTimeFormat: 'DD.MM.YYYY'
+        dateFormat: 'DD.MM.YYYY',
+        timeFormat: 'HH:mm'
     })
     .controller('BaseController',
     [
-        'FriendService', 'StorageService', 'AppConfig', function (friendService, storageService, config) {
+        'FriendService', 'StorageService', 'AppConfig', 'FriendStatusEnum', '$scope', function (friendService, storageService, config, statusEnum, $scope) {
             var self = this;
             this.submit = function () {
                 if (this.model.userId) {
@@ -27,7 +28,7 @@
                 }
               
             };
-
+            this.statusEnum = statusEnum;
             this.model = {
                 userId: null,
                 statistics: null,
@@ -36,7 +37,7 @@
 
             //17864153
             function init() {
-                self.model.userId = storageService.getItem(config.storageUserKey);
+                self.model.userId = 17864153 //storageService.getItem(config.storageUserKey);
                 if (self.model.userId) {
                     fillData();
                 } else {
@@ -47,9 +48,33 @@
             function fillData() {
                 friendService.getStatistics(self.model.userId)
                       .then(function (data) {
-                          self.model.statistics = data;
+                          self.model.filteredStatistics =  self.model.statistics = data;
                       });
             }
+            function filterData(str) {
+                var result = [];
+                if (self.model.statistics) {
+                    for (var i = 0; i < self.model.statistics.length; ++i) {
+                       var filtered = self.model.statistics[i].data.filter(function(item) {
+                           return (item.first_name.toLowerCase() + ' ' + item.last_name.toLowerCase()).indexOf(str.toLowerCase()) > -1;
+                       });
+                       if (filtered.length) {
+                           var clone = angular.copy(self.model.statistics[i]);
+                           clone.data = filtered;
+                           result.push(clone);
+                       }
+                    }
+                }
+                self.model.filteredStatistics = result;
+            }
+
+            $scope.$watch(function() {
+                return self.model.entry;
+            }, function(newValue) {
+                if (angular.isDefined(newValue)) {
+                    filterData(newValue);
+                }
+            });
 
             init();
 
@@ -58,7 +83,7 @@
     ])
     .service('FriendService',
     [
-        'Friends', 'FriendStatus', '$q', function (friendsProvider, friendStatus, $q) {
+        'Friends', 'FriendStatusEnum', '$q', '$window', 'AppConfig', function (friendsProvider, statusEnum, $q, $window, config) {
 
             this.getStatistics = getStatistics;
 
@@ -79,13 +104,20 @@
                         }
                     }
                     if (!exists) {
-                        nextSnapshot[i].status = reverse ? friendStatus.deleted : friendStatus.added;
+                        nextSnapshot[i].status = reverse ? statusEnum.deleted : statusEnum.added;
                         result.push(nextSnapshot[i]);
                     }
                 }
                 return result;
             }
-
+            function modifySnapshot(snapshot) {
+                for (var j = 0; j < snapshot.data.length; ++j) {
+                    snapshot.data[j].lastSeenFormattedDateTime = $window.moment(snapshot.data[j].last_seen.time * 1000).format(config.timeFormat + ' ' + config.dateFormat);
+                }
+                snapshot.date = $window.moment(snapshot.date * 1000).format(config.dateFormat);
+              
+               
+            }
             function getStatistics(userId) {
                 var defer = $q.defer();
                 friendsProvider.getFriends(userId)
@@ -105,17 +137,21 @@
                             if (lastSnapshot) {
                                 unconcatedResult.push(
                                 {
-                                    date: friendsSnapshots[i].date,
+                                    date: currentSnapshot.date,
                                     data: compareSnapshots(lastSnapshot.data, currentSnapshot.data, true)
                                 });
 
                                 unconcatedResult.push(
                                 {
-                                    date: friendsSnapshots[i].date,
+                                    date: currentSnapshot.date,
                                     data: compareSnapshots(lastSnapshot.data, currentSnapshot.data)
                                 });
                             }
-                            lastSnapshot = friendsSnapshots[i];
+                       
+                                modifySnapshot(currentSnapshot);
+     
+                          
+                            lastSnapshot = currentSnapshot;
                         }
                         var keys = _.uniq([].map.call(unconcatedResult,
                             function (item) {
@@ -131,7 +167,8 @@
                             if (tmp.length) {
                                 result.push({
                                     date: keys[i],
-                                    data: tmp
+                                    data: tmp,
+                                    formattedDate: $window.moment(keys[i] * 1000).format(config.dateFormat)
                                 });
                             }
 
