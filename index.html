@@ -1,44 +1,70 @@
 <html ng-app="app">
 <head>
     <script src="bower_components/jquery/jquery.js"></script>
+   
+
     <script src="bower_components/moment/moment.js"></script>
+  
     <script src="bower_components/angular/angular.js"></script>
-	<script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
     <link href="Content/Common.css" rel="stylesheet"/>
+    
     <script src="app.js"></script>
 </head>
 <body ng-controller="BaseController as ctrl">
-<form ng-if="ctrl.model.noUserId" ng-submit="ctrl.submit()">
+<!--<form ng-if="ctrl.model.noUserId" ng-submit="ctrl.submit()">
     <input ng-model="ctrl.model.userId"/>
-</form>
+</form>-->
 
     <div class="b-layout">
-        <div class="b-screen b-screen_entering b-screen_entering_open">
+        <div class="b-screen b-screen_entering b-screen_hidden">
             <div class="b-screen__content"></div>
         </div>
         <div class="b-screen">
             <div class="b-screen__content">
-                <div class="b-statistics">
-                    <div class="b-statistics-group">
-                        <div class="b-statistics-group__title">
-                            30.02.1002
-							
+                <div class="b-statistics" ng-if="ctrl.model.statistics.length">
+                    <input type="text" class="b-statistics__search" placeholder="Поиск" ng-model="ctrl.model.entry"/>
+                    <div class="b-statistics__groups">
+                        <div class="b-statistics-group" ng-repeat="group in ctrl.model.filteredStatistics">
+                            <div class="b-statistics-group__title b-statistics-group-title">
+                                <span class="b-statistics-group-title__text" ng-bind="group.formattedDate"></span>
+                            </div>
+                            <div class="b-statistics-group__item b-friend" ng-repeat="friend in group.data">
+                                <div class="b-friend__col b-friend__col_left">
+                                    <div class="b-friend-photo" ng-class="::{'b-friend-photo_online-icon': friend.online !==0 }">
+                                        <div class="b-friend-photo__image" style="background-image: url('{{::friend.photo_200_orig}}')"></div>
+                                    </div>
+                                </div>
+                                <div class="b-friend__col b-friend__col_right">
+                                    <a class="b-friend__title" ng-href="https://vk.com/id{{::friend.uid}}" target="_blank"><span ng-bind="::friend.first_name"></span>&nbsp;<span ng-bind="::friend.last_name"></span></a>
+                                    <span ng-if="::friend.online === 0">
+                                        Последний раз был(а) в сети в <span ng-bind="::friend.lastSeenFormattedDateTime"></span>
+                                    </span>
+                                </div>
+
+                                <span class="b-friend__status" ng-class="::{'b-friend__status_deleted': friend.status === ctrl.statusEnum.deleted,
+                                      'b-friend__status_added': friend.status === ctrl.statusEnum.added}"
+                                      ng-bind="::friend.status === ctrl.statusEnum.deleted ? 'Удален': 'Добавлен'"></span>
+                            </div>
+                            <!--<div class="b-statistics-group__item b-friend">
+                        <div class="b-friend__photo-wrapper b-friend__col b-friend__col_left">
+                            <img src="" onerror="this.src = 'https://vk.com/images/camera_100.png'" class="b-friend__photo"/>
+                        </div>
+                        <div class="b-friend__col b-friend__col_right">
+                            <strong class="b-friend__title">Роман Алексей Роман Алексей Роман Алексей Роман Алексей</strong>
+                        </div>
+                    </div>-->
                         </div>
                     </div>
                 </div>
             </div>
+            </div>
         </div>
-    </div>
+   
 
 
-    <div ng-if="ctrl.model.statistics.length">
-    <div ng-repeat="timeGroup in ctrl.model.statistics">
-        <div ng-repeat="friend in timeGroup.data" >
-            
-            <img ng-src="{{friend.photo_200_orig}}" width="200" height="200"/>
-        </div>
-    </div>
-</div>
+   
 
 </body>
 
