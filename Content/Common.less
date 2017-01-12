@@ -1,0 +1,38 @@
+@font-size:1.4rem;
+
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+           html {
+               font-size:62.5%;
+           }
+body {
+    background: #edeef0;
+}
+
+.b-layout,
+.b-screen {
+    height: 100%;
+}
+
+.b-screen {
+    white-space:nowrap;
+    text-align:center;
+    &:before {
+        content:'';
+        vertical-align:middle;
+        display:inline-block;
+        width:0;
+        height:100%;
+    }
+    &__content {
+        text-align:left;
+        vertical-align:middle;
+        display:inline-block;
+        white-space:normal;
+    }
+} 
+
