@@ -22,16 +22,15 @@ html {
 }
 
 .b-statistics {
-    padding: 30px;
+   padding: 30px 0;
     padding-top: 0;
-    width: 500px;
-    max-width: 100%;
     background: white;
     box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
-
+    display:flex;
+    flex-direction:column;
+    height:100%;
     &__search {
         border: 0;
-        margin-bottom: 10px;
         width: 100%;
         font-family: @base-font-family;
         background: url(https://vk.com/images/search_icon.png) 0 center no-repeat;
@@ -44,6 +43,9 @@ html {
     }
 
     &__groups {
+        flex-basis:100%;
+        overflow:auto;
+        padding: 0 30px;
     }
 
     &-group {
@@ -101,18 +103,18 @@ body {
         top: -100%;
     }
 
-    &:before {
+    /*&:before {
         content: '';
         vertical-align: middle;
         display: inline-block;
         width: 0;
         height: 100%;
-    }
+
+    }*/
 
     &__content {
         text-align: left;
         vertical-align: middle;
-        display: inline-block;
         white-space: normal;
     }
 }

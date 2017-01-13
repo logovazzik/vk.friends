@@ -1,26 +1,18 @@
 <html ng-app="app">
 <head>
-    <script src="bower_components/jquery/jquery.js"></script>
-   
-
-    <script src="bower_components/moment/moment.js"></script>
-  
-    <script src="bower_components/angular/angular.js"></script>
-    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="Scripts/build/build.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
     <link href="Content/Common.css" rel="stylesheet"/>
-    
-    <script src="app.js"></script>
 </head>
-<body ng-controller="BaseController as ctrl">
+<body ng-controller="StatisticsController as ctrl">
 <!--<form ng-if="ctrl.model.noUserId" ng-submit="ctrl.submit()">
     <input ng-model="ctrl.model.userId"/>
 </form>-->
 
     <div class="b-layout">
-        <div class="b-screen b-screen_entering b-screen_hidden">
+        <!--<div class="b-screen b-screen_entering b-screen_hidden">
             <div class="b-screen__content"></div>
-        </div>
+        </div>-->
         <div class="b-screen">
             <div class="b-screen__content">
                 <div class="b-statistics" ng-if="ctrl.model.statistics.length">
