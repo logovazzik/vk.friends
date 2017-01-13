@@ -39,6 +39,37 @@ html {
   flex-basis: 100%;
   overflow: auto;
   padding: 0 30px;
+  font-size: 0;
+  white-space: nowrap;
+  text-align: center;
+}
+.b-statistics__groups:before {
+  content: '';
+  vertical-align: middle;
+  display: inline-block;
+  width: 0;
+  height: 100%;
+}
+.b-statistics-groups__title {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 1.4rem;
+  color: #939393;
+  font-weight: normal;
+}
+.b-statistics-groups:before {
+  content: '';
+  vertical-align: middle;
+  display: none;
+  width: 0;
+  height: 100%;
+}
+.b-statistics-groups_no-result:before {
+  display: inline-block;
+}
+.b-statistics-group {
+  font-size: 1.2rem;
+  text-align: left;
 }
 .b-statistics-group-title {
   margin-bottom: 10px;
@@ -183,4 +214,12 @@ a:hover {
   padding-right: 30px;
   flex-basis: 100%;
   border-top: solid 1px #e7e8ec;
+}
+[ng-cloak],
+[data-ng-cloak],
+[x-ng-cloak],
+.ng-cloak,
+.x-ng-cloak,
+.ng-hide:not(.ng-hide-animate) {
+  display: none !important;
 }

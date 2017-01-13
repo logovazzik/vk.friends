@@ -6,8 +6,7 @@ angular.module('app')
             friendsUrl: null
 			},
                 cacheableData,
-                serverTime,
-                snapshotExists;
+                serverTime;
 
             this.setUrls = function (config) {
 				angular.extend(urls, config);
@@ -30,7 +29,6 @@ angular.module('app')
                     function getServerTime() {
                         return $http.jsonp(urls.serverTimeUrl)
                             .then(function (response) {
-                                debugger;
                                 return response.data.response;
                             });
                     }
@@ -53,23 +51,7 @@ angular.module('app')
                                         return defer.promise;
                                     }
 
-                                    if ((storageData = storageService.getItem(config.storageFriendsKey))) {
-
-                                        if ((storageData = storageData[userId])) {
-                                            snapshotExists = false;
-                                            for (var i = 0; i < storageData.length; ++i) {
-                                                if (isTheSameDay(storageData[i].date, serverTime)) {
-                                                    snapshotExists = true;
-                                                    break;
-                                                }
-                                            }
-                                            if (snapshotExists) {
-                                                defer.resolve(cacheableData = storageData);
-                                                return defer.promise;
-                                            }
-
-                                        }
-                                    }
+                                    
 
 
                                     getFriends.inProcess = true;
@@ -80,7 +62,7 @@ angular.module('app')
 
                                             data = data ? data : {};
                                             data[userId] = data[userId] || [];
-                                            debugger;
+                                            
                                             data[userId].push(new Snapshot({
                                                 date: serverTime,
                                                 data: response.data.response
