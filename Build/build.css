@@ -152,7 +152,8 @@ a:hover {
   font-size: 1rem;
   position: absolute;
   right: 0;
-  top: 6px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 .b-friend__status_added {
   background-color: #5cb85c;
