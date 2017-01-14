@@ -6,6 +6,7 @@ var gulp = require('gulp'),
     jsSrc = [
     './bower_components/moment/moment.js',
     './bower_components/angular/angular.js',
+    './Scripts/app/app.version.js',
     './Scripts/app/app.js',
     './Scripts/app/controllers/*.js',
     './Scripts/app/services/*.js',

@@ -14,8 +14,8 @@ angular.module('app')
             };
 
             this.$get = [
-                '$http', '$q', '$window', 'Config', 'StorageService',
-                function ($http, $q, $window, config, storageService) {
+                '$http', '$q', '$window', 'Config', 'StorageService', 'Utils',
+                function ($http, $q, $window, config, storageService, utils) {
 
                     function isTheSameDay(unix1, unix2) {
                         return moment.unix(unix1).isSame(moment.unix(unix2), 'day');
@@ -51,7 +51,7 @@ angular.module('app')
 
                                     getFriends.inProcess = true;
                                     $http
-                                        .jsonp(urls.friendsUrl)
+                                        .jsonp(utils.applyTemplate(urls.friendsUrl, {userId: userId}))
                                         .then(function (response) {
 
                                             var storageData = storageService.getItem(config.storageFriendsKey),
