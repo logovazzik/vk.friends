@@ -14,7 +14,7 @@ angular.module('app', [])
             var defaultVersion = '1.0',
                 currentVersion = $window.APP_VERSION || defaultVersion,
                 parsedVersion = parseVersion(currentVersion),
-                storageVersion = storageService.getItem(config.storageVersionKey);
+                storageVersion = storageService.getItem(config.storageVersionKey, true);
 
             if (!storageVersion || parseVersion(storageVersion) !== parsedVersion) {
                 updateStorage();

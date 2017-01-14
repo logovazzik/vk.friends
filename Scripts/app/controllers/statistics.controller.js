@@ -18,7 +18,6 @@
             };
 
             function init() {
-                debugger;
                 self.model.userId = utils.q2ajx($window.location.search.replace(/^\?/, ""))[config.userKeyUrl] || storageService.getItem(config.storageUserKey);
 
                 if (self.model.userId) {
