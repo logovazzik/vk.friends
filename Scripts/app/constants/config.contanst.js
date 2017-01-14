@@ -6,6 +6,6 @@ angular.module('app')
         storageFriendsKey: 'vk.friends',
         dateFormat: 'DD.MM.YYYY',
         timeFormat: 'HH:mm',
-        storageVersionsKey: 'vk.friends.version'
+        storageVersionKey: 'vk.friends.version'
     });
    

@@ -14,14 +14,17 @@ angular.module('app', [])
             var defaultVersion = '1.0',
                 currentVersion = $window.APP_VERSION || defaultVersion,
                 parsedVersion = parseVersion(currentVersion),
-                storageVersion = parseVersion(storageService.getItem(config.storageVersionsKey, true) || defaultVersion);
-            
-            if (storageVersion !== parsedVersion) {
-                storageService.setItem(config.storageVersionsKey, currentVersion);
-                storageService.removeItem(config.storageFriendsKey);
-                storageService.removeItem(config.storageUserKey);
-            }
+                storageVersion = storageService.getItem(config.storageVersionKey);
 
+            if (!storageVersion || parseVersion(storageVersion) !== parsedVersion) {
+                updateStorage();
+            } 
+          
+           function updateStorage() {
+               storageService.setItem(config.storageVersionKey, currentVersion);
+               storageService.removeItem(config.storageFriendsKey);
+               storageService.removeItem(config.storageUserKey);
+           }
            function parseVersion(version) {
                return +(version.toString().replace('\.', ''));
            }
