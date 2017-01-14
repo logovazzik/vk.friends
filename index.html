@@ -2,16 +2,17 @@
 <head>
     <script src="Scripts/build/build.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
-    <link href="Content/Common.css" rel="stylesheet" />
+    <link href="Content/Common.css" rel="stylesheet"/>
+    <meta charset="utf-8"/>
 </head>
 <body ng-controller="StatisticsController as ctrl">
     <div class="b-layout" ng-cloak>
         <div class="b-screen">
             <div class="b-screen__content">
                 <div class="b-statistics">
-                    <input type="text" class="b-statistics__search" placeholder="Поиск" ng-model="ctrl.model.entry" />
+                    <input type="text" class="b-statistics__search" placeholder="РџРѕРёСЃРє" ng-model="ctrl.model.entry" />
                     <div class="b-statistics__groups b-statistics-groups" ng-class="{'b-statistics-groups_no-result': ctrl.model.statistics.length === 0}">
-                        <h3 ng-if="ctrl.model.statistics.length === 0" class="b-statistics-groups__title">Ваш запрос не дал результатов</h3>
+                        <h3 ng-if="ctrl.model.statistics.length === 0" class="b-statistics-groups__title">Р’Р°С€ Р·Р°РїСЂРѕСЃ РЅРµ РґР°Р» СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ</h3>
                         <div ng-if="ctrl.model.statistics.length">
                             <div class="b-statistics-group" ng-repeat="group in ctrl.model.filteredStatistics">
                                 <div class="b-statistics-group__title b-statistics-group-title">
@@ -26,13 +27,13 @@
                                     <div class="b-friend__col b-friend__col_right">
                                         <a class="b-friend__title" ng-href="https://vk.com/id{{::friend.uid}}" target="_blank"><span ng-bind="::friend.first_name"></span>&nbsp;<span ng-bind="::friend.last_name"></span></a>
                                         <span ng-if="::friend.online === 0">
-                                            Последний раз был(а) в сети в <span ng-bind="::friend.lastSeenFormattedDateTime"></span>
+                                            РџРѕСЃР»РµРґРЅРёР№ СЂР°Р· Р±С‹Р»(Р°) РІ СЃРµС‚Рё РІ <span ng-bind="::friend.lastSeenFormattedDateTime"></span>
                                         </span>
                                     </div>
 
                                     <span class="b-friend__status" ng-class="::{'b-friend__status_deleted': friend.status === ctrl.statusEnum.deleted,
                                       'b-friend__status_added': friend.status === ctrl.statusEnum.added}"
-                                          ng-bind="::friend.status === ctrl.statusEnum.deleted ? 'Удален': 'Добавлен'"></span>
+                                          ng-bind="::friend.status === ctrl.statusEnum.deleted ? 'РЈРґР°Р»РµРЅ': 'Р”РѕР±Р°РІР»РµРЅ'"></span>
                                 </div>
 
                             </div>

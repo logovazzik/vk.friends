@@ -18,7 +18,8 @@
             };
 
             function init() {
-                self.model.userId = utils.q2ajx($window.location.search)[config.userKeyUrl] || storageService.getItem(config.storageUserKey);
+                debugger;
+                self.model.userId = utils.q2ajx($window.location.search.replace(/^\?/, ""))[config.userKeyUrl] || storageService.getItem(config.storageUserKey);
 
                 if (self.model.userId) {
                     storageService.setItem(config.storageUserKey, self.model.userId);
@@ -30,9 +31,9 @@
 
             function fillData() {
                 friendService.getStatistics(self.model.userId)
-                      .then(function (data) {
-                          self.model.filteredStatistics =  self.model.statistics = data;
-                      });
+                    .then(function(data) {
+                        self.model.filteredStatistics = self.model.statistics = data;
+                    });
             }
             function filterData(str) {
                 var result = [];

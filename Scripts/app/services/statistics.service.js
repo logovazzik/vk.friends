@@ -1,6 +1,6 @@
 angular.module('app').service('StatisticsService',
     [
-        'Friends', 'StatusEnum', '$q', '$window', 'Config', function (friendsProvider, statusEnum, $q, $window, config) {
+        'Friends', 'StatusEnum', '$q', '$window', 'Config', 'Utils', function (friendsProvider, statusEnum, $q, $window, config, utils) {
 
             this.getStatistics = getStatistics;
 
@@ -70,10 +70,11 @@ angular.module('app').service('StatisticsService',
                           
                             lastSnapshot = currentSnapshot;
                         }
-                        var keys = _.uniq([].map.call(unconcatedResult,
+                        var keys = utils.uniq([].map.call(unconcatedResult,
                             function (item) {
                                 return item.date;
                             }));
+                        
                         for (var i = 0; i < keys.length; ++i) {
                             var tmp = [];
                             for (var j = 0; j < unconcatedResult.length; ++j) {

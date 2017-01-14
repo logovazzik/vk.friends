@@ -2,9 +2,9 @@ angular.module('app')
 	.provider('Friends',
         function () {
             var urls = {
-				 serverTimeUrl:null,
-            friendsUrl: null
-			},
+                    serverTimeUrl: null,
+                    friendsUrl: null
+                },
                 cacheableData,
                 serverTime;
 
@@ -12,11 +12,6 @@ angular.module('app')
 				angular.extend(urls, config);
                 
             };
-
-            function Snapshot(settings) {
-                this.date = settings.date;
-                this.data = settings.data;
-            }
 
             this.$get = [
                 '$http', '$q', '$window', 'Config', 'StorageService',
@@ -40,7 +35,7 @@ angular.module('app')
                                 serverTime = data;
                             })
                                 .then(function () {
-                                    var storageData;
+                                  
                                     if (getFriends.inProcess) {
                                         return getFriends.defer.promise;
                                     }
@@ -58,19 +53,43 @@ angular.module('app')
                                     $http
                                         .jsonp(urls.friendsUrl)
                                         .then(function (response) {
-                                            var data = storageService.getItem(config.storageFriendsKey);
 
-                                            data = data ? data : {};
-                                            data[userId] = data[userId] || [];
-                                            
-                                            data[userId].push(new Snapshot({
+                                            var storageData = storageService.getItem(config.storageFriendsKey),
+                                                snapshotExists = false;
+
+
+                                            storageData = storageData || {};
+                                            storageData[userId] = storageData[userId] || [];
+
+                                            if (storageData[userId].length === 0) {
+                                                storageData[userId].push({
+                                                    data: response.data.response
+                                                });
+                                            }
+
+                                            for (var i = 0; i < storageData[userId].length; ++i) {
+                                                if (isTheSameDay(storageData[userId][i].date, serverTime)) {
+                                                    snapshotExists = true;
+                                                    break;
+                                                }
+                                            }
+                                            var snapshot = {
                                                 date: serverTime,
                                                 data: response.data.response
-                                            }));
+                                            };
+                                            
+                                            if (snapshotExists) {
+                                                storageData[userId][i] = snapshot;
+                                            } else {
+                                                storageData[userId].push(snapshot);
+                                            }
 
-                                            storageService.setItem(config.storageFriendsKey, data);
 
-                                            defer.resolve(cacheableData = data[userId]);
+                                           
+
+                                            storageService.setItem(config.storageFriendsKey, storageData);
+
+                                            defer.resolve(cacheableData = storageData[userId]);
                                         })
                                         .finally(function () {
                                             getFriends.inProcess = false;

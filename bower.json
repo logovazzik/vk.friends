@@ -16,8 +16,6 @@
   ],
   "dependencies": {
     "moment-js": "^0.6.0",
-    "angular": "1.6",
-    "jquery": "1.9",
-    "underscore": "^1.8.3"
+    "angular": "1.6"
   }
 }

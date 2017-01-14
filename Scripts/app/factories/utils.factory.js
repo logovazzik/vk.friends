@@ -2,6 +2,7 @@ angular.module('app').factory('Utils', function () {
         return {
             ajx2q: ajx2q,
             q2ajx: q2ajx,
+            uniq:uniq,
             applyTemplate: applyTemplate
         }
 
@@ -11,6 +12,15 @@ angular.module('app').factory('Utils', function () {
 
         function isArray(obj) {
             return Object.prototype.toString.call(obj) === '[object Array]';
+        }
+        function uniq(array) {
+            var result = [];
+            for (var i = 0; i < array.length; ++i) {
+                if (result.indexOf(array[i]) === -1) {
+                    result.push(array[i]);
+                }
+            }
+            return result;
         }
 
         function ajx2q(qa) {
